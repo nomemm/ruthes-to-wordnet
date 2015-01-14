@@ -14,164 +14,136 @@
         <xsl:variable name="conc_id">
             <xsl:value-of select="./@id"/>
         </xsl:variable>
-        <xsl:value-of select="$conc_id"/>
-        <xsl:text> 01 n 01</xsl:text>
+
+<!--   begin of synset     -->
+        <xsl:text>{</xsl:text>
+        
         <xsl:for-each select="/data/synonyms/entry_rel[@concept_id=$conc_id]">
+           
+            
             <xsl:variable name="text_id">
                 <xsl:value-of select="@entry_id"/>
             </xsl:variable>
-            <xsl:if test="/data/entries/entry[@id=$text_id]/synt_type/text()='N'">
-                <xsl:text> </xsl:text>
+           
+            <xsl:if test="/data/entries/entry[@id=$text_id]/synt_type/text()='N'">  
+                
+                <xsl:call-template name="translit">
+                    <xsl:with-param name="str"
+                        select="/data/concepts/concept[@id=$conc_id]/name/text()"/>
+                </xsl:call-template>
+                <xsl:text>,</xsl:text>
                 <xsl:call-template name="translit">
                     <xsl:with-param name="str"
                         select="/data/entries/entry[@id=$text_id]/name/text()"/>
                 </xsl:call-template>
-                <xsl:text> 0</xsl:text>
-            </xsl:if>
+                <xsl:call-template name="sense">
+                    <xsl:with-param name="tid" select="$text_id"/>
+                    <xsl:with-param name="cid" select="$conc_id"/>
+                </xsl:call-template>    
+                <xsl:text>,</xsl:text>
+            </xsl:if>            
         </xsl:for-each>
-        <xsl:if test="count(/data/relations/rel[@from=$conc_id]) &lt; 10 ">        
-        <xsl:text> 00</xsl:text>
-        </xsl:if>
-        <xsl:if test="count(/data/relations/rel[@from=$conc_id]) &gt; 9 ">        
-            <xsl:text> 0</xsl:text>
-        </xsl:if>
-        <xsl:value-of select="count(/data/relations/rel[@from=$conc_id])"/>
+        
         <xsl:for-each select="/data/relations/rel[@from=$conc_id and @name='ВЫШЕ']">
             <xsl:variable name="to_id">
                 <xsl:value-of select="./@to"/>
-            </xsl:variable>
-            <xsl:text> @ </xsl:text>
-            <xsl:value-of select="@to"/>
-            <xsl:text> {</xsl:text>         
+            </xsl:variable>            
+                  
             <xsl:call-template name="translit">
                 <xsl:with-param name="str"
                     select="//concept[@id=$to_id]/name/text()"/>
             </xsl:call-template>
-            <xsl:text>}</xsl:text>
-            <xsl:text> n 0000</xsl:text>
+            <xsl:text>,</xsl:text>
+            <xsl:text>@ </xsl:text>
         </xsl:for-each>
+        
         <xsl:for-each select="/data/relations/rel[@from=$conc_id and @name='НИЖЕ']">
             <xsl:variable name="to_id">
                 <xsl:value-of select="./@to"/>
-            </xsl:variable>
-            <xsl:text> ~ </xsl:text>
-            <xsl:value-of select="@to"/>
-            <xsl:text> {</xsl:text>
+            </xsl:variable>                        
             <xsl:call-template name="translit">
                 <xsl:with-param name="str"
                     select="//concept[@id=$to_id]/name/text()"/>
             </xsl:call-template>
-            <xsl:text>}</xsl:text>
-            <xsl:text> n 0000</xsl:text>
+            <xsl:text>,</xsl:text>
+            <xsl:text>~ </xsl:text>
         </xsl:for-each>
-        <xsl:for-each select="/data/relations/rel[@from=$conc_id and @name='ЧАСТЬ']">
-            <xsl:variable name="to_id">
-                <xsl:value-of select="./@to"/>
-            </xsl:variable>
-            <xsl:text> %p </xsl:text>
-            <xsl:value-of select="@to"/>
-            <xsl:text> {</xsl:text>
-            <xsl:call-template name="translit">
-                <xsl:with-param name="str"
-                    select="//concept[@id=$to_id]/name/text()"/>
-            </xsl:call-template>
-            <xsl:text>}</xsl:text>
-            <xsl:text> n 0000</xsl:text>
-        </xsl:for-each>
+        
         <xsl:for-each select="/data/relations/rel[@from=$conc_id and @name='ЦЕЛОЕ']">
             <xsl:variable name="to_id">
                 <xsl:value-of select="./@to"/>
-            </xsl:variable>
-            <xsl:text> #p </xsl:text>
-            <xsl:value-of select="@to"/>
-            <xsl:text> {</xsl:text>
+            </xsl:variable>                        
             <xsl:call-template name="translit">
                 <xsl:with-param name="str"
                     select="//concept[@id=$to_id]/name/text()"/>
             </xsl:call-template>
-            <xsl:text>}</xsl:text>
-            <xsl:text> n 0000</xsl:text>
+            <xsl:text>,</xsl:text>
+            <xsl:text>#p </xsl:text>
         </xsl:for-each>
-        <xsl:if test="gloss">
-            <xsl:text> | </xsl:text>
-            <xsl:value-of select="./gloss/text()"/>
-            <xsl:text>
-</xsl:text>
-        </xsl:if>
-    </xsl:template>
-
-    <!-- <xsl:template name="txt" match="/data/entries/entry">
-        <xsl:param name="t"/>
-        <xsl:param name="c"/>  
         
-    </xsl:template>-->
+        <xsl:for-each select="/data/relations/rel[@from=$conc_id and @name='ЧАСТЬ']">
+            <xsl:variable name="to_id">
+                <xsl:value-of select="./@to"/>
+            </xsl:variable>                        
+            <xsl:call-template name="translit">
+                <xsl:with-param name="str"
+                    select="//concept[@id=$to_id]/name/text()"/>
+            </xsl:call-template>
+            <xsl:text>,</xsl:text>
+            <xsl:text>%p </xsl:text>
+        </xsl:for-each>
+        
+        <xsl:if test="not(gloss/text()='')">
+            <xsl:text>(</xsl:text>
+            <xsl:value-of select="./gloss/text()"/>
+            <xsl:text>)</xsl:text>
+            <!--   end of synset     -->
+        </xsl:if>
+        <xsl:text>}
+</xsl:text>
+      
+    </xsl:template>
 
-    <!-- <xsl:template match="/data/entries/entry[./synt_type/text()='V']">
-        <xsl:variable name="text_id"><xsl:value-of select="./@id"/></xsl:variable>
-        <xsl:variable name="con_id"><xsl:value-of
-            select="/data/synonyms/entry_rel[@entry_id=$text_id]/@concept_id"/></xsl:variable>
-        http://labinform.ru/pub/ruthes/wn/wn30/instances/word-<xsl:call-template name="translit"
-            ><xsl:with-param name="str" select="./name/text()"/></xsl:call-template> inSynset http://labinform.ru/pub/ruthes/wn/wn30/instances/synset-verb-<xsl:call-template
-                name="translit"><xsl:with-param name="str"
-                    select="/data/concepts/concept[@id=$con_id]/name/text()"
-                /></xsl:call-template>-<xsl:value-of select="$con_id"/>
-    </xsl:template> 
-    
-    <xsl:template match="/data/entries/entry[./synt_type/text()='Adj']">
-        <xsl:variable name="text_id"><xsl:value-of select="./@id"/></xsl:variable>
-        <xsl:variable name="con_id"><xsl:value-of
-            select="/data/synonyms/entry_rel[@entry_id=$text_id]/@concept_id"/></xsl:variable>
-        http://labinform.ru/pub/ruthes/wn/wn30/instances/word-<xsl:call-template name="translit"
-            ><xsl:with-param name="str" select="./name/text()"/></xsl:call-template> inSynset http://labinform.ru/pub/ruthes/wn/wn30/instances/synset-adjective-<xsl:call-template
-                name="translit"><xsl:with-param name="str"
-                    select="/data/concepts/concept[@id=$con_id]/name/text()"
-                /></xsl:call-template>-<xsl:value-of select="$con_id"/>
-    </xsl:template> 
-
-    <xsl:template match="/data/entries/entry[./synt_type/text()='Adv']">
-        <xsl:variable name="text_id"><xsl:value-of select="./@id"/></xsl:variable>
-        <xsl:variable name="con_id"><xsl:value-of
-            select="/data/synonyms/entry_rel[@entry_id=$text_id]/@concept_id"/></xsl:variable>
-        http://labinform.ru/pub/ruthes/wn/wn30/instances/word-<xsl:call-template name="translit"
-            ><xsl:with-param name="str" select="./name/text()"/></xsl:call-template> inSynset http://labinform.ru/pub/ruthes/wn/wn30/instances/synset-adverb-<xsl:call-template
-                name="translit"><xsl:with-param name="str"
-                    select="/data/concepts/concept[@id=$con_id]/name/text()"
-                /></xsl:call-template>-<xsl:value-of select="$con_id"/>
-    </xsl:template> -->
-
-
-    <!--  
-      <xsl:template match="/data/entries/entry[./synt_type/text()='N']">
-        <xsl:variable name="text_id"><xsl:value-of  select="./@id"/></xsl:variable>        
-        http://labinform.ru/pub/ruthes/wn/wn30/instances/word-noun-<xsl:value-of select="./name"/>-<xsl:value-of select="/data/synonyms/entry_rel[@entry_id=$text_id]/@concept_id"/>        
+    <xsl:template name="sense" >
+        <xsl:param name="tid"/>
+        <xsl:param name="cid"/>
+        <xsl:for-each select="/data/synonyms/entry_rel[@entry_id=$tid]">
+            <xsl:if test="@concept_id=$cid">
+                <xsl:value-of select="position()"/>
+            </xsl:if>
+        </xsl:for-each>
+        
     </xsl:template>
     
-      <xsl:template match="/data/entries/entry[./synt_type/text()='V']">
-        <xsl:variable name="text_id"><xsl:value-of  select="./@id"/></xsl:variable>        
-        http://labinform.ru/pub/ruthes/wn/wn30/instances/word-verb-<xsl:value-of select="./name"/>-<xsl:value-of select="/data/synonyms/entry_rel[@entry_id=$text_id]/@concept_id"/>        
-    </xsl:template>
-    
-    <xsl:template match="/data/entries/entry[./synt_type/text()='Adj']">
-        <xsl:variable name="text_id"><xsl:value-of  select="./@id"/></xsl:variable>        
-        http://labinform.ru/pub/ruthes/wn/wn30/instances/word-adjective-<xsl:value-of select="./name"/>-<xsl:value-of select="/data/synonyms/entry_rel[@entry_id=$text_id]/@concept_id"/>        
-    </xsl:template>
-    
-    <xsl:template match="/data/entries/entry[./synt_type/text()='Adv']">
-        <xsl:variable name="text_id"><xsl:value-of  select="./@id"/></xsl:variable>        
-        http://labinform.ru/pub/ruthes/wn/wn30/instances/word-adverb-<xsl:value-of select="./name"/>-<xsl:value-of select="/data/synonyms/entry_rel[@entry_id=$text_id]/@concept_id"/>        
-    </xsl:template>-->
-
-
     <!-- KAD: Транслитерация -->
-    <xsl:variable name="l-rus" select="'абвгдеёзийклмнопрстуфхьыъэАБВГДЕЁЗИЙКЛМНОПРСТУФХЬЫЪЭ'"/>
-    <xsl:variable name="l-trans" select="'абвгдеёзийклмнопрстуфхьыъэАБВГДЕЁЗИЙКЛМНОПРСТУФХЬЫЪЭ'"/>
-    <!--<xsl:variable name="l-trans" select="'abvgdeеzijklmnoprstufh`y`eABVGDEEZIJKLMNOPRSTUFH`Y`E'"/>
-    <xsl:variable name="l-trans" select="'abvgdeеzijklmnoprstufh`y`eABVGDEEZIJKLMNOPRSTUFH`Y`E'"/>-->
+    <xsl:variable name="l-rus" select="'абвгдеёзийклмнопрстуфхьыъэАБВГДЕЁЗИЙКЛМНОПРСТУФХЬЫЪЭ(),;:&quot;'"/>
+    <xsl:variable name="l-trans" select="'абвгдеёзийклмнопрстуфхьыъэАБВГДЕЁЗИЙКЛМНОПРСТУФХЬЫЪЭ______'"/>
+    <!--<xsl:variable name="l-trans" select="'abvgdeеzijklmnoprstufhbybeABVGDEEZIJKLMNOPRSTUFHbYbE__'"/>-->
+    <!--<xsl:variable name="l-trans" select="'abvgdeеzijklmnoprstufh`y`eABVGDEEZIJKLMNOPRSTUFH`Y`E'"/>-->
     <xsl:template name="translit" match="text()">
         <xsl:param name="str"/>
         <xsl:variable name="q1" select="$str"/>
         <xsl:variable name="q2" select="normalize-space(translate($q1,$l-rus,$l-trans))"/>
-        <xsl:value-of select="$str"/>
+                     
+        <xsl:variable name="qSpace">
+            <xsl:call-template name="replace">
+                <xsl:with-param name="str" select="$q2"/>
+                <xsl:with-param name="search-for" select="' '"/>
+                <xsl:with-param name="replace-to" select="'_'"/>
+            </xsl:call-template>
+        </xsl:variable>
+        
+        <xsl:variable name="qQuot">
+            <xsl:call-template name="replace">
+                <xsl:with-param name="str" select="$qSpace"/>
+                <xsl:with-param name="search-for" select="'&quot;'"/>
+                <xsl:with-param name="replace-to" select="'_'"/>
+            </xsl:call-template>
+        </xsl:variable>
+        
+                        
+        <xsl:value-of select="$qQuot"/>
+        
         <!--<xsl:variable name="q3">
             <xsl:call-template name="replace">
                 <xsl:with-param name="str" select="$q2"/>
@@ -276,6 +248,8 @@
             </xsl:call-template>
         </xsl:variable>
 
+
+
         <xsl:variable name="qSpace">
             <xsl:call-template name="replace">
                 <xsl:with-param name="str" select="$q8u"/>
@@ -283,6 +257,8 @@
                 <xsl:with-param name="replace-to" select="'_'"/>
             </xsl:call-template>
         </xsl:variable>
+
+
 
         <xsl:value-of select="$qSpace"/>-->
     </xsl:template>
